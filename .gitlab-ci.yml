@@ -40,10 +40,10 @@ download buildben:
 mvn compile:
   stage: compile
   script:
-    - BUILDBEN_HOST_URL=$BUILDBEN_HOST_URL BUILDBEN_S3_BUCKET_NAME=$BUILDBEN_S3_BUCKET_NAME BUILDBEN_MINIO_URL=$BUILDBEN_MINIO_URL BUILDBEN_S3_SECRET_ACCESS_KEY=$BUILDBEN_S3_SECRET_ACCESS_KEY BUILDBEN_S3_ACCESS_KEY_ID=$BUILDBEN_S3_ACCESS_KEY_ID BUILDBEN_S3_REGION=$BUILDBEN_S3_REGION ./buildben mvn compile --settings settings.xml -Dmaven.javadoc.skip=true
+    - ./buildben mvn compile --settings settings.xml -Dmaven.javadoc.skip=true
 
 mvn test-compile:
   stage: compile and test
   script:
-    - BUILDBEN_HOST_URL=$BUILDBEN_HOST_URL BUILDBEN_S3_BUCKET_NAME=$BUILDBEN_S3_BUCKET_NAME BUILDBEN_MINIO_URL=$BUILDBEN_MINIO_URL BUILDBEN_S3_SECRET_ACCESS_KEY=$BUILDBEN_S3_SECRET_ACCESS_KEY BUILDBEN_S3_ACCESS_KEY_ID=$BUILDBEN_S3_ACCESS_KEY_ID BUILDBEN_S3_REGION=$BUILDBEN_S3_REGION ./buildben mvn test-compile --settings settings.xml -Dmaven.javadoc.skip=true
-    - BUILDBEN_SKIP_UNITS=$BUILDBEN_SKIP_UNITS BUILDBEN_HOST_URL=$BUILDBEN_HOST_URL BUILDBEN_S3_BUCKET_NAME=$BUILDBEN_S3_BUCKET_NAME BUILDBEN_MINIO_URL=$BUILDBEN_MINIO_URL BUILDBEN_S3_SECRET_ACCESS_KEY=$BUILDBEN_S3_SECRET_ACCESS_KEY BUILDBEN_S3_ACCESS_KEY_ID=$BUILDBEN_S3_ACCESS_KEY_ID BUILDBEN_S3_REGION=$BUILDBEN_S3_REGION ./buildben mvn surefire:test --settings settings.xml
+    - ./buildben mvn test-compile --settings settings.xml -Dmaven.javadoc.skip=true
+    - ./buildben mvn surefire:test --settings settings.xml
