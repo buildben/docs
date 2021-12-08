@@ -1,40 +1,27 @@
 # Use the latest 2.1 version of CircleCI pipeline process engine.
 # See: https://circleci.com/docs/2.0/configuration-reference
 version: 2.1
-parameters:
-  BUILDBEN_HOST_URL:
-    type: string
-    default: "<insert value here>"
-  BUILDBEN_AGENT_URL:
-    type: string
-    default: "<insert value here>"
-  BUILDBEN_S3_REGION:
-    type: string
-    default: "<insert value here>"
-  BUILDBEN_S3_BUCKET_NAME:
-    type: string
-    default: "<insert value here>"
-  BUILDBEN_S3_ACCESS_KEY_ID:
-    type: string
-    default: "<insert value here>"
-  BUILDBEN_S3_SECRET_ACCESS_KEY:
-    type: string
-    default: "<insert value here>"
-  BUILDBEN_MINIO_URL:
-    type: string
-    default: "<insert value here>"
-  BUILDBEN_SKIP_UNITS:
-    type: string
-    default: "<insert value here>"
     
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/2.0/configuration-reference/#jobs
 jobs:
   job1:
-    # Specify the execution environment. You can specify an image from Dockerhub or use one of the Convenience Images from CircleCI's Developer Hub.
+    # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
     # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
     docker:
       - image: cimg/base:2021.11
+        environment:
+          BUILDBEN_HOST_URL: https://backend.michael.test.buildben.io
+          BUILDBEN_AGENT_URL: https://init-agent.michael.test.buildben.io/executable
+          BUILDBEN_S3_REGION: eu-central-1
+          BUILDBEN_S3_BUCKET_NAME: buildben-repo
+          BUILDBEN_S3_ACCESS_KEY_ID: buildben
+          BUILDBEN_S3_SECRET_ACCESS_KEY: buildben
+          BUILDBEN_MINIO_URL: https://minio.michael.test.buildben.io
+          LOG_LEVEL: debug
+          CI: true
+          BUILDBEN_SKIP_UNITS: OsagoMetricsTestNPE,UC_02_01_05_ScenarioServiceImplTestAddendumForEarlyTerminatingScenarioServiceTest,UC_02_03_ScenarioServiceImplTest,SignedProcessorTest,UC_02_01_03_ScenarioServiceImplTest,com.epam.edp.flk.FLK_02_80_Test,UC_02_01_01_ScenarioServiceTest,FLK_02_81_1_Test,FLK_02_81_Test,FLK_02_80_Test,FLK_02_80_3_Test,OsagoContractCreateWorkflowTest,UC_02_02_ScenarioServiceImplTest
+
     steps:
       - run:
           name: "clean env"
@@ -44,21 +31,20 @@ jobs:
       - run:
           name: "download buildben"
           command: |
-            curl << pipeline.parameters.BUILDBEN_AGENT_URL >> -o buildben
+            curl $BUILDBEN_AGENT_URL -o buildben
             chmod +x buildben
       - run:
           name: "mvn compile"
           command: |
-            BUILDBEN_HOST_URL=<< pipeline.parameters.BUILDBEN_HOST_URL >> BUILDBEN_S3_BUCKET_NAME=<< pipeline.parameters.BUILDBEN_S3_BUCKET_NAME >> BUILDBEN_MINIO_URL=<< pipeline.parameters.BUILDBEN_MINIO_URL >> BUILDBEN_S3_SECRET_ACCESS_KEY=<< pipeline.parameters.BUILDBEN_S3_SECRET_ACCESS_KEY >> BUILDBEN_S3_ACCESS_KEY_ID=<< pipeline.parameters.BUILDBEN_S3_ACCESS_KEY_ID >> BUILDBEN_S3_REGION=<< pipeline.parameters.BUILDBEN_S3_REGION >> ./buildben mvn compile --settings settings.xml -Dmaven.javadoc.skip=true
+            ./buildben mvn compile --settings settings.xml -Dmaven.javadoc.skip=true
       - run:
           name: "mvn test compile"
           command: |
-            BUILDBEN_HOST_URL=<< pipeline.parameters.BUILDBEN_HOST_URL >> BUILDBEN_S3_BUCKET_NAME=<< pipeline.parameters.BUILDBEN_S3_BUCKET_NAME >> BUILDBEN_MINIO_URL=<< pipeline.parameters.BUILDBEN_MINIO_URL >> BUILDBEN_S3_SECRET_ACCESS_KEY=<< pipeline.parameters.BUILDBEN_S3_SECRET_ACCESS_KEY >> BUILDBEN_S3_ACCESS_KEY_ID=<< pipeline.parameters.BUILDBEN_S3_ACCESS_KEY_ID >> BUILDBEN_S3_REGION=<< pipeline.parameters.BUILDBEN_S3_REGION >> ./buildben mvn test-compile --settings settings.xml -Dmaven.javadoc.skip=true
+            ./buildben mvn test-compile --settings settings.xml -Dmaven.javadoc.skip=true
       - run:
           name: "mvn test"
           command: |
-            BUILDBEN_SKIP_UNITS=<< pipeline.parameters.BUILDBEN_SKIP_UNITS >> BUILDBEN_HOST_URL=<< pipeline.parameters.BUILDBEN_HOST_URL >> BUILDBEN_S3_BUCKET_NAME=<< pipeline.parameters.BUILDBEN_S3_BUCKET_NAME >> BUILDBEN_MINIO_URL=<< pipeline.parameters.BUILDBEN_MINIO_URL >> BUILDBEN_S3_SECRET_ACCESS_KEY=<< pipeline.parameters.BUILDBEN_S3_SECRET_ACCESS_KEY >> BUILDBEN_S3_ACCESS_KEY_ID=<< pipeline.parameters.BUILDBEN_S3_ACCESS_KEY_ID >> BUILDBEN_S3_REGION=<< pipeline.parameters.BUILDBEN_S3_REGION >> ./buildben mvn surefire:test --settings settings.xml
-
+            ./buildben mvn surefire:test --settings settings.xml
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:
